@@ -1,0 +1,197 @@
+<div class="container-fluid">
+        <div class="createDiagnostic d-flex justify-content-end pe-4">
+                <button class="CDbutton" button mat-flat-button color="primary" [hidden]="!hideCDO" (click)="createDiagnosticOrder()" *ngIf="hideTable === false">{{labels.createDiagnosticOrder}}</button>
+        </div>
+        <div class="tableSection" *ngIf="!hideTable && showTable">
+                <app-table [data]="dataSource" [tableName]="tableName" (rowClicked)="rowClicked($event)"></app-table>
+        </div>
+        
+        
+        <mat-card class="mat-card-main" *ngIf="hideTable === true" >
+                <div class="d-flex cdoHeader">
+                        <div class="flex-grow-1"><h4 class="p-2">{{labels.diagnosticOrder | titlecase}} &nbsp; {{labels.id}} &colon; {{selectedId}}</h4></div>
+                        <div class="">
+                                <span class="closeIcon">
+                                        <button mat-icon-button  (click)="backToDOtable()">
+                                                <mat-icon>close</mat-icon>
+                                        </button>
+                                </span>
+                        </div>
+                        
+                </div>
+        <mat-card-container>
+                <form [formGroup]="DiagnosticForm" (ngSubmit)="onSubmit()">
+                        <div class="container-fluid">
+                                <div class="row">
+                                 <div class="col-sm-6">
+                                        <ng-container>
+                                                <mat-grid-list cols="2">
+                                                        <mat-form-field class="form-field"  #requesterNameField (mouseover)="showEditIcon ='requesterNameField'" (mouseleave)="showEditIcon = 'null'"> 
+                                                                <mat-label>{{labels.requesterName}}</mat-label>
+                                                                <mat-icon *ngIf="showEditIcon === 'requesterNameField'" matSuffix (click)="onEdit(selectedRow,'requesterName')" class="form-edit">edit</mat-icon>
+                                                                <div *ngIf="selectedRow.editFieldName =='requesterName'">
+                                                                        <input matInput formControlName="requesterName"  placeholder="Requester Name" >
+                                                                </div>
+                                                                <div *ngIf="selectedRow.editFieldName !=='requesterName'">
+                                                                        <input matInput formControlName="requesterName" placeholder="Requester Name" readonly="true">                                              
+                                                                 </div>
+                                                <mat-hint *ngIf="DiagnosticForm.get('requesterName')?.touched && DiagnosticForm.get('requesterName')?.errors">
+                                                         {{labels.requiredField}}
+                                                </mat-hint>
+                                                        </mat-form-field>
+                                                        <mat-form-field class="form-field mt-2" #uploadingPointField (mouseover)="showEditIcon ='uploadingPointField'" (mouseleave)="showEditIcon = 'null'">
+                                                                <mat-label>{{labels.uploadingPoint}}</mat-label>
+                                                                <mat-icon  *ngIf="showEditIcon === 'uploadingPointField'" matSuffix class="form-edit">edit</mat-icon>
+                                                                <mat-select formControlName="uploadingPoint" >
+                                                                        <mat-option [value]="up" *ngFor="let up of uploadingPoint">{{up}}</mat-option>
+                                                                </mat-select>
+                                                                <mat-hint *ngIf="DiagnosticForm.get('uploadingPoint')?.touched && DiagnosticForm.get('uploadingPoint')?.errors">
+                                                                         {{labels.requiredField}}
+                                                                </mat-hint>
+                                                        </mat-form-field>
+                                                </mat-grid-list>
+                                                <mat-grid-list cols="2">
+                                                        <mat-form-field class="form-field" #finVinField (mouseover)="showEditIcon ='finVinField'" (mouseleave)="showEditIcon = 'null'">
+                                                                <mat-label>{{labels.finVin}}</mat-label>
+                                                                <mat-icon  *ngIf="showEditIcon === 'finVinField'" matSuffix class="form-edit" (click)="onEdit(selectedRow,'finVin')">edit</mat-icon>
+                                                                <div *ngIf="selectedRow.editFieldName =='finVin'">
+                                                                        <input matInput formControlName="finVin"  placeholder="FIN/VIN (17 characters)" >
+                                                                </div>
+                                                                <div *ngIf="selectedRow.editFieldName !=='finVin'">
+                                                                        <input matInput formControlName="finVin"  placeholder="FIN/VIN (17 characters)" readonly="true">                                              
+                                                                 </div>
+                                                                 <mat-hint *ngIf="DiagnosticForm.get('finVin')?.touched && DiagnosticForm.get('finVin')?.errors">
+                                                                        {{labels.requiredField}}
+                                                                </mat-hint>
+                                                        </mat-form-field>
+                                                        <mat-form-field class="form-field" #damageCodeField (mouseover)="showEditIcon ='damageCodeField'" (mouseleave)="showEditIcon = 'null'">
+                                                                <mat-label>{{labels.damageCode}}</mat-label>
+                                                                <mat-icon *ngIf="showEditIcon === 'damageCodeField'" matSuffix class="form-edit" (click)="onEdit(selectedRow,'damageCode')">edit</mat-icon>
+                                                                <div *ngIf="selectedRow.editFieldName =='damageCode'">
+                                                                        <input matInput formControlName="damageCode"  placeholder="damageCode" >
+                                                                </div>
+                                                                <div *ngIf="selectedRow.editFieldName !=='damageCode'">
+                                                                        <input matInput formControlName="damageCode"  placeholder="damageCode" readonly="true">                                              
+                                                                 </div>
+                                                                 <mat-hint *ngIf="DiagnosticForm.get('damageCode')?.touched && DiagnosticForm.get('damageCode')?.errors">
+                                                                        {{labels.requiredField}}
+                                                                </mat-hint>
+                                                        </mat-form-field>
+                                                </mat-grid-list>
+                                              
+                                                <mat-grid-list cols="2">
+                                                        <mat-form-field class="form-field" #createdByField (mouseover)="showEditIcon ='createdByField'" (mouseleave)="showEditIcon = 'null'">
+                                                                <mat-label>{{labels.createdBy}}</mat-label>
+                                                                <mat-icon *ngIf="showEditIcon === 'createdByField'"  matSuffix class="form-edit" (click)="onEdit(selectedRow,'createdBy')">edit</mat-icon>
+                                                                <div *ngIf="selectedRow.editFieldName =='createdBy'">
+                                                                        <input matInput formControlName="createdBy"  placeholder="createdBy" >
+                                                                </div>
+                                                                <div *ngIf="selectedRow.editFieldName !=='createdBy'">
+                                                                        <input matInput formControlName="createdBy"  placeholder="createdBy" readonly="true">                                              
+                                                                 </div>
+                                                                 <mat-hint *ngIf="DiagnosticForm.get('createdBy')?.touched && DiagnosticForm.get('createdBy')?.errors">
+                                                                        {{labels.requiredField}}
+                                                                </mat-hint>
+                                                        </mat-form-field>
+                                                        <mat-form-field class="form-field" #createdDateField (mouseover)="showEditIcon ='createdDateField'" (mouseleave)="showEditIcon = 'null'">
+                                                                <mat-label>{{labels.createdDate}}</mat-label>
+                                                                <mat-icon *ngIf="showEditIcon === 'createdDateField'" matSuffix class="form-edit" (click)="onEdit(selectedRow,'createdDate')">edit</mat-icon>
+                                                                <div *ngIf="selectedRow.editFieldName =='createdDate'">
+                                                                        <input matInput formControlName="createdDate"  placeholder="createdDate" >
+                                                                </div>
+                                                                <div *ngIf="selectedRow.editFieldName !=='createdDate'">
+                                                                        <input matInput formControlName="createdDate"  placeholder="createdDate" readonly="true">                                              
+                                                                 </div>
+                                                                 <mat-hint *ngIf="DiagnosticForm.get('createdDate')?.touched && DiagnosticForm.get('createdDate')?.errors">
+                                                                        {{labels.requiredField}}
+                                                                </mat-hint>
+                                                                <!-- <input matInput  formControlName="createdDate" [matDatepicker]="picker" > -->
+                                                                <!-- <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                                                               <mat-datepicker #picker></mat-datepicker> -->
+                                                        </mat-form-field>
+                                                </mat-grid-list>
+                                                <mat-grid-list cols="2">
+                                                        <mat-form-field class="PnForm_field " #partNumberField (mouseover)="showEditIcon ='partNumberField'" (mouseleave)="showEditIcon = 'null'">
+                                                                <mat-label>{{labels.partNumber}}</mat-label>
+                                                                <mat-icon *ngIf="showEditIcon === 'partNumberField'" matSuffix class="form-edit" (click)="onEdit(selectedRow,'partNumber')">edit</mat-icon>
+                                                                <mat-icon matSuffix (click)="partsNumberModel()">view_list</mat-icon>
+                                                                <div *ngIf="selectedRow.editFieldName =='partNumber'">
+                                                                        <textarea matInput formControlName="partNumber"class="pnField" [(ngModel)]="value"></textarea>
+                                                                </div>
+                                                                <div *ngIf="selectedRow.editFieldName !=='partNumber'">
+                                                                        <textarea matInput formControlName="partNumber"class="pnField" readonly="true"></textarea>                                              
+                                                                 </div>
+                                                                <mat-hint *ngIf="DiagnosticForm.get('partNumber')?.touched && DiagnosticForm.get('partNumber')?.errors">
+                                                                         {{labels.requiredField}}
+                                                                </mat-hint>
+                                                        </mat-form-field>
+                                                       
+                                                </mat-grid-list>
+                                                <mat-grid-list cols="2">
+                                                        <mat-form-field class="form-field">
+                                                                <mat-label>{{labels.status}}</mat-label>
+                                                                <mat-icon matSuffix class="form-edit" (click)="onEdit(selectedRow,'status')">edit</mat-icon>
+                                                                <div *ngIf="selectedRow.editFieldName =='status'">
+                                                                        <input matInput formControlName="status"  placeholder="status" >
+                                                                </div>
+                                                                <div *ngIf="selectedRow.editFieldName !=='status'">
+                                                                        <input matInput formControlName="status"  placeholder="status" readonly="true">                                              
+                                                                 </div>
+                                                                 <mat-hint *ngIf="DiagnosticForm.get('status')?.touched && DiagnosticForm.get('status')?.errors">
+                                                                        {{labels.requiredField}}
+                                                                </mat-hint>
+                                                        </mat-form-field>
+                                                </mat-grid-list>
+                                                <mat-grid-list cols="2">
+                                                        <mat-form-field class="text-form" #notesField (mouseover)="showEditIcon ='notesField'" (mouseleave)="showEditIcon = 'null'">
+                                                                <mat-label>{{labels.note}}</mat-label>
+                                                                <mat-icon *ngIf="showEditIcon === 'notesField'" matSuffix class="form-edit" (click)="onEdit(selectedRow,'notes')">edit</mat-icon>
+                                                                <div *ngIf="selectedRow.editFieldName =='notes'">
+                                                                        <textarea matInput formControlName="notes"></textarea>
+                                                                </div>
+                                                                <div *ngIf="selectedRow.editFieldName !=='notes'">
+                                                                        <input matInput formControlName="notes"  readonly="true">                                              
+                                                                 </div>
+                                                                 <mat-error *ngIf="DiagnosticForm.get('notes')?.hasError('pattern')">Invalid Input</mat-error>
+                                                        </mat-form-field>
+                                                </mat-grid-list>
+                                                <div class="file-folder">
+                                                        <input type="file" class="filetype" name="Choose file or Browse">
+                                                </div>
+                                                
+                                        </ng-container>
+                                 </div>
+                                <div class="col-sm-6">
+                                        <mat-card  class="matCard2">
+                                                <mat-divider class="divider"></mat-divider>
+                                                <mat-card-content>
+                                                        
+                                                        <mat-card-actions>
+                                                                <mat-icon matSuffix class="mat_icon form-edit">
+                                                                        send
+                                                                </mat-icon>
+                                                        </mat-card-actions>
+                                                        
+                                                </mat-card-content>
+                                        </mat-card>
+                                </div>
+                                </div>
+                        </div>
+                </form>
+        </mat-card-container>
+        <div class="butten-part">
+                <button class="botton-btn" [disabled]=" diableSave" (click)=" onSubmit()" type="submit" mat-raised-button color="primary"> {{labels.save}}</button>
+                <button class="botton-btn" type="button" mat-raised-button color="primary" id="approve-button" [disabled]="disableApprove" (click)="approveReason()">{{labels.approve}}</button>
+                <button class="botton-btn" type="button" mat-raised-button color="primary" id="decline-button" (click)="declineReason()" [disabled]="disableDecline">{{labels.decline}}</button>
+                <button class="botton-btn"[disabled]="disableCreateRule" type="button" mat-raised-button color="primary" (click)="navigateTo()">{{labels.createRule}}</button>
+                
+        </div>
+        </mat-card>
+        
+        
+        <ng-container *ngIf="showTable === false && !hideTable">
+                <app-create-diagnostic-order (showDOTable)="showDOTable($event)"></app-create-diagnostic-order>
+        </ng-container>
+        
+           
+</div>
