@@ -1,0 +1,127 @@
+<section [ngClass]="{'content-border':(tableName === 'diagnosticOrderTable'|| tableName === 'PartsRequestTable' || tableName === 'PartsInspectionTable'|| tableName ==='auditLogTable'),'contentBorderOne':tableName === 'tableNameOne' || tableName === 'tableNameTwo' }"
+   (tableName)="checkTableName($event)" >
+  <table mat-table (click)="tableName === 'tableNameOne'? toggle($event):null"
+       [dataSource]="dataSource"  class="table-main" matSort matSortActive="createdDate" matSortDirection="asc">
+      <ng-container *ngFor="let column of displayedColumns" matColumnDef="{{column}}"  class="table-header-main">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{column | tableHeader}}
+          <button mat-icon-button [matMenuTriggerFor]="menu"  (click)="onFilterClick(column, $event)" class="btn btn-sm filter_btn" aria-label="Example icon-button with a menu">
+            <mat-icon>filter_list</mat-icon>
+         </button>
+         <mat-menu #menu="matMenu" class="filter_dropdown">
+          <section class="selectAll-section">
+              <span class="example-list-section">
+                  <ul class="p-0">
+                      <li *ngFor="let element of filterValues; let i = index">
+                          <mat-checkbox [checked]="element.checked" [value]="element.key" (click)="onFilterItemClick($event,element,filterValues)">
+                              {{element.key}}
+                          </mat-checkbox>
+                      </li>
+                  </ul>
+              </span>
+          </section>
+      </mat-menu>
+        </th>
+          <td mat-cell *matCellDef="let row" 
+           (click)="emitingSelectedRow(tableName, row)"
+           (mouseover)="tableName === 'PartsRequestTable' || 'PartsInspectionTable'? setHoveredState(row,true):null" 
+           (mouseleave)="tableName === 'PartsRequestTable' || 'PartsInspectionTable'? setHoveredState(row,false):null"
+           (mouseover)="tableName === 'tableNameTwo'? setHoveredState(row,true):null" 
+           (mouseleave)="tableName === 'tableNameTwo'? setHoveredState(row,false):null"
+           (click)="tableName === 'tableNameOne'?onRowClick(row):null"
+           [ngClass]="{'highlighted':tableName === 'tableNameOne'&& row?.partNumber
+            && (selectedRowIndex == row?.partNumber)}"
+            
+          >
+            <span *ngIf="column === 'id'">
+              <mat-radio-button></mat-radio-button>
+            </span>
+            <span *ngIf="column === 'status' && tableName != 'PartsInspectionTable'">
+              <img *ngIf="row.status === 'approved'" src="assets/icons/statusGreen.svg" alt="approved image">
+            <img *ngIf="row.status === 'rejected'" src="assets/icons/statusRed.svg" alt="rejected image">
+            <img *ngIf="row.status === 'pending'" src="assets/icons/statusYellow.svg" alt="pending image">
+            <span *ngIf="row.status === 'archived'">{{row.status}}</span>
+            </span>
+            <span *ngIf="column==='status' && tableName === 'PartsInspectionTable'">
+              {{row[column]}}
+            </span>
+           <span *ngIf="column != 'status' && tableName === 'diagnosticOrderTable'">
+            {{row[column]}}
+           </span>
+           <span *ngIf="(column ==='partNumber' || column === 'partName') && tableName === 'tableNameOne'">
+            {{row[column]}}
+           </span>
+           <span *ngIf="(column ==='partNumber' || column === 'partName') && tableName === 'tableNameTwo'" (click)="onSelect(row)">
+            {{row[column]}}
+           </span>
+           <span *ngIf="column === 'units' && tableName === 'tableNameTwo'">
+            <div class="d-flex flex-row">
+              <div class="p-2">
+                <span *ngIf="approveState">
+                  {{row[column]}}
+                </span>
+                <input *ngIf="!approveState" [(ngModel)]="row.units"  (input)="onSelect(row)" class="inputBox" type="number" value="{{row[column]}}">
+              </div>
+
+              <div class="p-2" [ngStyle]="{'display': hovered === row ? 'table-cell':'none'}"> 
+              <mat-icon *ngIf="!approveState" (click)="OnDelete(row)" class="close-button">close_small</mat-icon></div>
+            </div>  
+          </span>
+         <span *ngIf="(column ==='arrived') && tableName === 'tableNameTwo'">
+          {{row[column]}}
+         </span>
+           <span *ngIf="tableName === 'PartsRequestTable'">
+            <span *ngIf="column != 'status' && column != 'createdDate'">
+              {{row[column]}}
+             </span>
+            <span *ngIf="column === 'createdDate'"  [ngStyle]="{'display': hovered !== row ? 'table-cell':'none'}"> {{row[column]}}</span>
+            <span *ngIf="column === 'createdDate' && hovered === row" class="actionIcons">
+              <mat-icon (click)="viewRule(row)">visibility</mat-icon>
+              <mat-icon (click)="editRule(row)" *ngIf="row.status !== 'archived'" [hidden]="row.status === 'DISABLED'">edit</mat-icon>
+              <button mat-icon-button (click)="duplicate(row)"> <img src="assets/icons/duplicate.svg" alt="duplicate"></button>
+            </span>
+           </span>
+           <span *ngIf="column != 'details' && tableName === 'auditLogTable'">
+            {{row[column]}}
+           </span>
+           <span *ngIf="column === 'details' && tableName === 'auditLogTable' && row['createdBy']=='SYSTEM'">
+            {{row[column]}}
+           </span>
+           <span *ngIf="column === 'details' && tableName === 'auditLogTable'">
+            <table>
+              <tr>
+                <th>{{labels.filedName}}</th>
+                <th>{{labels.newValue}}</th>
+                <th>{{labels.oldValue}}</th>
+              </tr>
+              <tr *ngFor="let detail of row[column]">
+                <td>{{detail.fieldName}}</td>
+                <td>{{detail.oldValue}}</td>
+                <td>{{detail.newValue}}</td>
+              </tr>
+            </table>
+           </span>
+
+           <span *ngIf="tableName === 'PartsInspectionTable'">
+            <span *ngIf="column != 'status' && column != 'inspectionStartDate' ">
+              {{row[column]}}
+             </span>
+            <span *ngIf="column === 'inspectionStartDate'"  [ngStyle]="{'display': hovered !== row ? 'table-cell':'none'}"> {{row[column]}}</span>
+              <span *ngIf="column === 'inspectionStartDate' && hovered === row" class="actionIcons">
+                <mat-icon>visibility</mat-icon>
+                <span [hidden]="row.status === 'Claim Accepted' || row.status === 'Claim Denied'">
+                  <mat-icon>edit</mat-icon>
+                </span>
+                
+                <mat-icon>delete</mat-icon>
+              </span>
+           </span>
+
+          </td>
+          
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.selected]="selection.isSelected(row) && tableName=='tableNameOne'" (click)="toggleRow(row)"></tr>
+  </table>
+
+</section>
+<mat-paginator *ngIf="tableName === 'diagnosticOrderTable' || tableName ==='PartsRequestTable' || tableName ==='PartsInspectionTable' || tableName ==='auditLogTable'"[pageSizeOptions]="[10, 20, 30]" aria-label="Select page of users"></mat-paginator>
